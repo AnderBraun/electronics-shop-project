@@ -1,30 +1,90 @@
+import csv
+import chardet
+import os
+
+class InstantiateCSVError(Exception):
+    pass
+
 class Item:
-    """
-    Класс для представления товара в магазине.
-    """
-    pay_rate = 1.0
     all = []
+    pay_rate = 1.0
 
-    def __init__(self, name: str, price: float, quantity: int) -> None:
-        """
-        Создание экземпляра класса item.
+    def __init__(self, name, price, quantity):
+        self.name = name
+        self.price = price
+        self.quantity = quantity
 
-        :param name: Название товара.
-        :param price: Цена за единицу товара.
-        :param quantity: Количество товара в магазине.
-        """
-        pass
+    @property
+    def name(self):
+        return self._name
 
-    def calculate_total_price(self) -> float:
-        """
-        Рассчитывает общую стоимость конкретного товара в магазине.
+    @name.setter
+    def name(self, value):
+        self._name = value
 
-        :return: Общая стоимость товара.
-        """
-        pass
+    def calculate_total_price(self):
+        return self.price * self.quantity
 
-    def apply_discount(self) -> None:
-        """
-        Применяет установленную скидку для конкретного товара.
-        """
-        pass
+    def apply_discount(self):
+        self.price *= Item.pay_rate
+
+    def add_item(self):
+        Item.all.append(self)
+
+    @staticmethod
+    def get_all_items():
+        return Item.all
+
+    @classmethod
+    def instantiate_from_csv(cls):
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        filename = os.path.join(current_dir, 'items.csv')
+
+        try:
+            with open(filename, 'rb') as rawfile:
+                result = chardet.detect(rawfile.read(10000))
+                encoding = result['encoding']
+
+            with open(filename, 'r', encoding=encoding) as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    name = row['name']
+                    price = float(row['price'])
+                    quantity = int(row['quantity'])
+                    item = cls(name, price, quantity)
+                    item.add_item()
+        except FileNotFoundError as e:
+            print(f"FileNotFoundError: {e}")
+            raise e
+        except csv.Error as e:
+            print(f"CSV Error: {e}")
+            raise InstantiateCSVError("Файл item.csv поврежден")
+
+    @staticmethod
+    def string_to_number(value):
+        return float(value)
+
+    def __repr__(self):
+        return f"Item('{self.name}', {self.price}, {self.quantity})"
+
+    def __str__(self):
+        print(f"Отладка: элемент __str__ вызывается по имени = {self.name}")
+        return self.name
+
+    def __add__(self, other):
+        if isinstance(other, Item):
+            return self.quantity + other.quantity
+        else:
+            raise TypeError("Неподдерживаемый тип для добавления")
+
+    def __radd__(self, other):
+        if isinstance(other, int):
+            return self.quantity + other
+        else:
+            raise TypeError("Неподдерживаемый тип для добавления")
+
+    def add_quantity(self, other):
+        if isinstance(other, Item):
+            return Item(self.name, self.price, self.quantity + other.quantity)
+        else:
+            raise TypeError("Неподдерживаемый тип для добавления")
