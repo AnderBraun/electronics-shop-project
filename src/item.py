@@ -10,7 +10,7 @@ class Item:
     pay_rate = 1.0
 
     def __init__(self, name, price, quantity):
-        self.name = name
+        self.name = name[:10]
         self.price = price
         self.quantity = quantity
 
@@ -20,7 +20,11 @@ class Item:
 
     @name.setter
     def name(self, value):
-        self._name = value
+        if len(value) > 10:
+            self._name = value[:10]
+            raise ValueError("Длина наименования товара превышает 10 символов.")
+        else:
+            self._name = value
 
     def calculate_total_price(self):
         return self.price * self.quantity
@@ -68,7 +72,6 @@ class Item:
         return f"Item('{self.name}', {self.price}, {self.quantity})"
 
     def __str__(self):
-        print(f"Отладка: элемент __str__ вызывается по имени = {self.name}")
         return self.name
 
     def __add__(self, other):
