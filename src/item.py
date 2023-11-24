@@ -10,9 +10,10 @@ class Item:
     pay_rate = 1.0
 
     def __init__(self, name, price, quantity):
-        self.name = name[:10]
+        self._name = name[:10]
         self.price = price
         self.quantity = quantity
+        self.add_item()
 
     @property
     def name(self):
@@ -32,15 +33,9 @@ class Item:
     def apply_discount(self):
         self.price *= Item.pay_rate
 
-    def add_item(self):
-        Item.all.append(self)
-
-    @staticmethod
-    def get_all_items():
-        return Item.all
-
     @classmethod
     def instantiate_from_csv(cls):
+        cls.all = []  # Очистим список перед инициализацией
         current_dir = os.path.dirname(os.path.abspath(__file__))
         filename = os.path.join(current_dir, 'items.csv')
 
@@ -56,7 +51,6 @@ class Item:
                     price = float(row['price'])
                     quantity = int(row['quantity'])
                     item = cls(name, price, quantity)
-                    item.add_item()
         except FileNotFoundError as e:
             print(f"FileNotFoundError: {e}")
             raise e
@@ -66,7 +60,16 @@ class Item:
 
     @staticmethod
     def string_to_number(value):
-        return float(value)
+        try:
+            return int(value)
+        except ValueError:
+            return float(value)
+
+    def add_item(self):
+        Item.all.append(self)
+
+    def get_all_items(self):
+        return Item.all
 
     def __repr__(self):
         return f"Item('{self.name}', {self.price}, {self.quantity})"
