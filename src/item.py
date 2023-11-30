@@ -10,7 +10,7 @@ class Item:
     pay_rate = 1.0
 
     def __init__(self, name, price, quantity):
-        self._name = name[:10]
+        self._name = name
         self.price = price
         self.quantity = quantity
         self.add_item()
@@ -22,7 +22,7 @@ class Item:
     @name.setter
     def name(self, value):
         if len(value) > 10:
-            self._name = value[:10]
+            self._name = value
             raise ValueError("Длина наименования товара превышает 10 символов.")
         else:
             self._name = value
