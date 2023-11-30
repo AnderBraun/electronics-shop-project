@@ -69,6 +69,12 @@ def test_get_all_items():
 
     assert Item.get_all_items() == [item1, item2]
 
+def test_str_representation(sample_item):
+    assert str(sample_item) == sample_item.name
+
+def test_repr_representation(sample_item):
+    expected_repr = f"Item('{sample_item.name}', {sample_item.price}, {sample_item.quantity})"
+    assert repr(sample_item) == expected_repr
 
 def test_add_quantity(sample_item):
     new_item = Item("New Item", 5.0, 2)
